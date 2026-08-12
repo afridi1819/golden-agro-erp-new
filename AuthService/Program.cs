@@ -104,6 +104,13 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
+// Create database schema if it does not exist
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    await db.Database.EnsureCreatedAsync();
+}
+
 // Seed roles on startup
 using (var scope = app.Services.CreateScope())
 {

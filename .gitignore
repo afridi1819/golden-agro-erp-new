@@ -113,3 +113,8 @@ coverage/
 
 # ASP.NET launch settings
 **/Properties/launchSettings.json
+# SSL certificates
+nginx/certbot/
+
+# local backups
+*.backup
