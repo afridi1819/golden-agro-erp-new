@@ -1,0 +1,98 @@
+GOLDENAGRO ERP SYSTEM
+FUNCTIONAL + NON-FUNCTIONAL REQUIREMENTS
+
+1) Functional Requirements (FR)
+FR-01 User Registration (Requested Role)
+- The system shall allow new users to register with a requested role (Manufacturer / Retailer).
+- The system shall capture user profile details during registration.
+- For Retailer registration, the system shall capture retailer-specific details (shopName, phone, address, gstNumber).
+
+FR-02 Registration Approval Workflow
+- The system shall create a pending approval request for each registration (except bootstrap admin rule).
+- The system shall expire approval requests after 24 hours if not decided.
+- The system shall allow Admin to approve/reject Manufacturer requests.
+- The system shall allow Admin OR approved Manufacturer to approve/reject Retailer requests.
+- On approval, the system shall activate the user account and assign the approved role.
+- On rejection, the system shall keep the user inactive (soft reject).
+
+FR-03 Bootstrap Admin Rule
+- If no Admin exists, the first user registering with requested role Manufacturer shall become Admin immediately.
+
+FR-04 Authentication & Authorization
+- The system shall allow active users to login and obtain JWT + refresh token.
+- The system shall deny login for inactive users and show appropriate messages:
+  - pending approval
+  - deactivated
+- The system shall enforce role-based access control (Admin / Manufacturer / Retailer).
+
+FR-05 User Account Management
+- The system shall allow users to change password.
+- The system shall allow users to logout and revoke refresh tokens.
+
+FR-06 Admin: Manufacturer Management
+- The system shall allow Admin to list manufacturer accounts.
+- The system shall allow Admin to create manufacturer accounts.
+- The system shall allow Admin to edit manufacturer profile (firstName/lastName).
+- The system shall allow Admin to deactivate/reactivate manufacturer accounts (soft delete).
+
+FR-07 Retailer Sync to Business API (upon approval)
+- On approval of retailer request, the system shall create/sync the retailer profile into the Business API database.
+- The system shall store retailer_id in AuthService user record and include retailer_id claim in JWT.
+
+FR-08 Business Operations (Manufacturer)
+- The system shall manage master data: Categories, Units, Taxes.
+- The system shall manage Suppliers.
+- The system shall manage Raw Materials inventory.
+- The system shall create Purchases and Purchase Items.
+- The system shall complete Purchases and update raw material stock.
+- The system shall manage Products and Finished Goods stock.
+- The system shall manage BOM (bill of materials) for products.
+- The system shall create and execute Production Orders.
+
+FR-09 Retailer Ordering
+- Retailer shall browse products, add to cart, and place orders (dummy payment).
+- Manufacturer shall view orders and confirm/complete orders.
+- The system shall link retailer orders to production (as implemented in backend).
+
+FR-10 Financial Tracking & Dashboard
+- The system shall manage Expenses (CRUD).
+- Completing a Purchase shall create an Expense entry for the purchase amount.
+- The system shall calculate dashboard statistics (sales, expenses, profit/loss) and trends.
+
+FR-11 UI/UX Requirements
+- Password fields shall provide show/hide toggle (eye icon).
+- Supplier phone input shall accept digits only and max 10 digits.
+- Login/Register buttons shall not appear for authenticated users.
+
+2) Non-Functional Requirements (NFR)
+NFR-01 Security
+- Passwords shall be hashed using ASP.NET Identity.
+- API endpoints shall require JWT authentication where applicable.
+- Role-based authorization shall be enforced in both AuthService and Business API.
+- Sensitive configs (DB passwords, JWT secrets) should be stored securely (env vars/secrets) in real deployment.
+
+NFR-02 Performance
+- Typical API responses for standard CRUD operations should complete within acceptable time (e.g., < 1s under normal load).
+- Dashboard endpoints should avoid heavy full-table scans where possible (use queries/indexes).
+
+NFR-03 Availability & Reliability
+- Services should start reliably and handle failures gracefully.
+- Approval requests should remain consistent even if services restart.
+
+NFR-04 Scalability
+- Architecture should allow horizontal scaling of frontend and APIs.
+- Databases should support growth via indexing and efficient queries.
+
+NFR-05 Maintainability
+- Code should be modular (controllers/services/repositories).
+- Consistent naming and shared components (e.g., PasswordInput).
+
+NFR-06 Usability
+- Clear user messages for pending approval, deactivated accounts, and validation errors.
+
+NFR-07 Auditability (basic)
+- Approval decisions shall store decidedAt, decidedByUserId, decisionNote.
+
+NFR-08 Compatibility
+- Browser support for modern evergreen browsers.
+- Backend compatible with configured .NET and Java runtimes.

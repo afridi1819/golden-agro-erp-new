@@ -1,0 +1,55 @@
+DOCUMENTATION (WHAT TO WRITE)
+
+1) README (Project Overview)
+- What the project is (ERP manufacturer-retailer)
+- Modules: AuthService, Business API, Frontend
+- High-level workflow
+
+2) Setup Guide
+- Prerequisites:
+  - Node + npm
+  - .NET SDK
+  - Java 17
+  - MySQL
+- Environment variables / config locations
+- How to run locally:
+  - AuthService
+  - Business API
+  - Frontend
+
+3) API Documentation
+AuthService endpoints:
+- /auth/register (request-based registration)
+- /auth/login
+- /approvals (list)
+- /approvals/{id}/approve
+- /approvals/{id}/reject
+- /admin/manufacturers
+
+Business API endpoints:
+- Suppliers, Purchases, Expenses, Orders, Production, Dashboard
+- Mention JWT requirement and roles
+
+4) Database Documentation
+- Auth DB tables: Users, RefreshTokens, ApprovalRequests
+- Business DB tables: suppliers, purchases, expenses, orders, etc.
+
+5) User Guide
+- Admin:
+  - bootstrap
+  - approve requests
+  - manage manufacturers
+- Manufacturer:
+  - approve retailers
+  - manage ERP operations
+- Retailer:
+  - browse products
+  - place order
+
+6) Troubleshooting
+- JWT mismatch (issuer/audience/secret)
+- CORS issues
+- DB connection errors
+
+7) Change Log / Release Notes (optional)
+- Keep short list of major changes

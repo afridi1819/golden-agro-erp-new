@@ -1,0 +1,352 @@
+/* Landing Page Styles - Golden Agro Foods */
+
+.landing-page {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #0a0a0a;
+  color: #D4AF37;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* Header */
+.landing-header {
+  background: linear-gradient(135deg, #D4AF37 0%, #C5A028 50%, #B8960F 100%);
+  color: #000;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+}
+
+.header-logo {
+  width: 180px;
+  height: 180px;
+  object-fit: contain;
+}
+
+.header-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.landing-header h1 {
+  margin: 0;
+  font-size: 2.8rem;
+  font-weight: 700;
+  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.3);
+}
+
+.landing-header p {
+  margin: 10px 0 0;
+  font-size: 1.2rem;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+/* Navigation */
+.landing-nav ul {
+  list-style: none;
+  background-color: #1a1a1a;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 0;
+  border-bottom: 2px solid #D4AF37;
+}
+
+.landing-nav ul li {
+  padding: 0;
+}
+
+.landing-nav ul li a {
+  display: block;
+  padding: 18px 30px;
+  color: #D4AF37;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border-bottom: 3px solid transparent;
+}
+
+.landing-nav ul li a:hover {
+  color: #fff;
+  background-color: #2a2a2a;
+  border-bottom-color: #D4AF37;
+}
+
+/* Sections */
+.landing-section {
+  padding: 50px 30px;
+  width: 100%;
+  text-align: center;
+}
+
+.landing-section-inner {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.landing-section h2 {
+  color: #D4AF37;
+  font-size: 2rem;
+  margin-bottom: 20px;
+  position: relative;
+  padding-bottom: 10px;
+  display: inline-block;
+}
+
+.landing-section h2::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #D4AF37, transparent);
+}
+
+.landing-section p {
+  color: #ccc;
+  line-height: 1.8;
+  font-size: 1.1rem;
+  max-width: 800px;
+  margin: 0 auto 20px;
+}
+
+.landing-section ul {
+  color: #bbb;
+  line-height: 2;
+  padding-left: 0;
+  list-style-position: inside;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.landing-section ul li {
+  margin-bottom: 8px;
+}
+
+.landing-section ul li::marker {
+  color: #D4AF37;
+}
+
+/* Product Image */
+.landing-image {
+  display: block;
+  margin: 30px auto;
+  border-radius: 12px;
+  max-width: 100%;
+  border: 3px solid #D4AF37;
+  box-shadow: 0 8px 32px rgba(212, 175, 55, 0.2);
+  transition: transform 0.3s ease;
+}
+
+.landing-image:hover {
+  transform: scale(1.02);
+}
+
+/* Newsletter Form */
+.landing-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  background: linear-gradient(145deg, #1a1a1a, #111);
+  padding: 35px;
+  border-radius: 15px;
+  width: 100%;
+  max-width: 380px;
+  margin: 50px auto;
+  border: 1px solid #333;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.landing-form h2 {
+  text-align: center;
+  color: #D4AF37;
+  margin-bottom: 10px;
+}
+
+.landing-form h2::after {
+  display: none;
+}
+
+.landing-form label {
+  color: #D4AF37;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.landing-form input {
+  padding: 14px 16px;
+  border: 1px solid #333;
+  border-radius: 8px;
+  background-color: #222;
+  color: #fff;
+  font-size: 1rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.landing-form input:focus {
+  outline: none;
+  border-color: #D4AF37;
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
+}
+
+.landing-form input::placeholder {
+  color: #666;
+}
+
+.landing-form button {
+  margin-top: 10px;
+  padding: 14px 24px;
+  background: linear-gradient(135deg, #D4AF37, #C5A028);
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  align-self: center;
+  min-width: 140px;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.landing-form button:hover {
+  background: linear-gradient(135deg, #E5C048, #D4AF37);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(212, 175, 55, 0.4);
+}
+
+/* Footer */
+.landing-footer {
+  background: linear-gradient(135deg, #D4AF37 0%, #C5A028 50%, #B8960F 100%);
+  color: #000;
+  text-align: center;
+  padding: 25px 20px;
+  margin-top: 60px;
+  font-weight: 500;
+}
+
+.landing-footer p {
+  margin: 0;
+  color: #000;
+}
+
+/* CTA Button for Login */
+.landing-cta {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 25px;
+}
+
+.landing-cta a {
+  padding: 12px 30px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.landing-cta .btn-primary {
+  background-color: #000;
+  color: #D4AF37;
+  border: 2px solid #000;
+}
+
+.landing-cta .btn-primary:hover {
+  background-color: #1a1a1a;
+  transform: translateY(-2px);
+}
+
+.landing-cta .btn-secondary {
+  background-color: transparent;
+  color: #000;
+  border: 2px solid #000;
+}
+
+.landing-cta .btn-secondary:hover {
+  background-color: #000;
+  color: #D4AF37;
+}
+
+/* Hero Section Enhancement */
+.hero-section {
+  text-align: center;
+  padding: 80px 30px;
+  background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
+  width: 100%;
+}
+
+.hero-section h2 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+}
+
+.hero-section h2::after {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.hero-section p {
+  max-width: 600px;
+  margin: 0 auto 30px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .landing-header h1 {
+    font-size: 2rem;
+  }
+
+  .landing-header p {
+    font-size: 1rem;
+  }
+
+  .landing-nav ul {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .landing-nav ul li a {
+    padding: 15px 20px;
+  }
+
+  .landing-section {
+    padding: 30px 20px;
+  }
+
+  .landing-section h2 {
+    font-size: 1.6rem;
+  }
+
+  .landing-form {
+    margin: 30px 20px;
+    padding: 25px;
+  }
+
+  .hero-section {
+    padding: 50px 20px;
+  }
+
+  .hero-section h2 {
+    font-size: 1.8rem;
+  }
+
+  .landing-cta {
+    flex-direction: column;
+    align-items: center;
+  }
+}

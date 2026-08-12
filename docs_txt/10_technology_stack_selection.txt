@@ -1,0 +1,44 @@
+TECHNOLOGY STACK SELECTION (TEXT)
+
+Frontend
+- React (SPA) + Vite
+  - Fast dev server, modern bundling
+- Tailwind CSS
+  - Rapid UI development
+- react-router-dom
+  - Routing and protected routes
+- @tanstack/react-query
+  - Data fetching, caching, invalidation
+- axios
+  - HTTP client with interceptors
+- lucide-react
+  - Icons (including eye toggle)
+- recharts
+  - Graphs and analytics charts
+
+Auth Service (Identity)
+- ASP.NET Core (.NET)
+- ASP.NET Identity
+  - Secure user management and password hashing
+- JWT Bearer authentication
+  - Stateless auth for APIs
+- EF Core + Pomelo.EntityFrameworkCore.MySql
+  - ORM + MySQL provider
+
+Business API (ERP)
+- Java 17
+- Spring Boot
+- Spring Web
+- Spring Security
+- Spring Data JPA (Hibernate)
+- MySQL Connector/J
+- jjwt (JWT parsing/verification)
+
+Databases
+- MySQL
+  - Separate schemas for Auth and Business
+
+Why this split?
+- AuthService can evolve independently (roles/approvals/multi-role future).
+- Business API focuses on ERP domain logic.
+- Frontend remains a thin client consuming APIs.

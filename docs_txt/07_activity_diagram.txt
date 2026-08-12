@@ -1,0 +1,36 @@
+ACTIVITY DIAGRAM (TEXT ONLY)
+
+Activity: Registration Approval Workflow
+
+[Start]
+  |
+  v
+(User submits registration with requestedRole)
+  |
+  v
+(Create User IsActive=false)
+  |
+  v
+(Create ApprovalRequest Status=Pending, ExpiresAt=+24h)
+  |
+  v
+(Wait for decision)
+  |
+  +------------------------------+
+  |                              |
+  v                              v
+(Admin/Manufacturer reviews)   (No review within 24h)
+  |                              |
+  v                              v
+{Decision?}                    (Mark request Expired)
+  |                              |
+  +---------+--------------------+
+            |
+            v
+      [End - user cannot login]
+
+If decision = Approve:
+  Approve -> Set user IsActive=true -> Assign role -> (If Retailer: sync to Business API) -> [End - user can login]
+
+If decision = Reject:
+  Reject -> Keep user inactive -> Mark request Rejected -> [End - user cannot login]

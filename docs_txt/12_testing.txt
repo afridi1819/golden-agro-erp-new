@@ -1,0 +1,54 @@
+TESTING (WHAT KIND AND HOW)
+
+1) Unit Tests
+AuthService (.NET)
+- TokenService tests:
+  - GenerateAccessToken includes role and retailer_id claim
+  - Refresh token generation length/format
+- Approval logic tests (if extracted into service):
+  - expiry handling
+  - role-based approval restrictions
+
+Business API (Spring)
+- Service tests:
+  - PurchaseService.completePurchase updates stock and creates Expense
+  - OrderService stock deduction and order status transitions
+  - Dashboard aggregation correctness
+
+Frontend
+- Component tests (optional):
+  - PasswordInput toggle
+  - Form validation (phone digits only)
+
+2) Integration Tests
+AuthService
+- Register -> creates ApprovalRequest
+- Approve -> activates user + assigns role
+- Login pending -> returns "Account pending approval"
+- Approve retailer -> calls Business API and stores retailerId
+
+Business API
+- JWT auth filter validates issuer/audience/secret
+- Protected routes require correct roles
+
+3) End-to-End (E2E) Tests (manual or automated)
+Manual flows:
+- Bootstrap admin registration
+- Manufacturer request -> admin approves -> manufacturer login works
+- Retailer request -> manufacturer approves -> retailer login -> order placement
+- Manufacturer completes purchase -> expense auto-created -> dashboard profit updates
+
+Tools (optional):
+- Playwright/Cypress for UI
+- Postman/Insomnia for API
+
+4) Security Tests (basic)
+- Attempt to access admin endpoints as non-admin
+- Attempt to approve manufacturer request as manufacturer (should fail)
+- Attempt to login before approval
+
+5) Regression / Smoke Tests
+- npm run lint
+- npm run build
+- dotnet build AuthService
+- Start services and run key flows

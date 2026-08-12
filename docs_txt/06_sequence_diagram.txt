@@ -1,0 +1,60 @@
+SEQUENCE DIAGRAMS (TEXT ONLY)
+
+A) Registration (Manufacturer/Retailer) -> Pending Approval
+
+User -> Frontend: Fill Register Form (requestedRole)
+Frontend -> AuthService: POST /auth/register
+AuthService -> Auth DB: Create User (IsActive=false)
+AuthService -> Auth DB: Create ApprovalRequest (Status=Pending, ExpiresAt=+24h)
+AuthService -> Frontend: { Success=true, Message="pending approval" }
+Frontend -> User: Show message + redirect to login
+
+
+B) Bootstrap Admin (First Manufacturer)
+
+User -> Frontend: Register (requestedRole=Manufacturer)
+Frontend -> AuthService: POST /auth/register
+AuthService -> Auth DB: Check Admin exists? (no)
+AuthService -> Auth DB: Create User (IsActive=true)
+AuthService -> Auth DB: Assign role Admin
+AuthService -> Auth DB: Save RefreshToken
+AuthService -> Frontend: JWT + refreshToken + user(role=Admin)
+Frontend -> User: Logged in -> Dashboard
+
+
+C) Approve Retailer Request
+
+Admin/Manufacturer -> Frontend: Open Requests page
+Frontend -> AuthService: GET /approvals
+AuthService -> Auth DB: fetch pending requests
+AuthService -> Frontend: list
+
+Admin/Manufacturer -> Frontend: Click Approve
+Frontend -> AuthService: POST /approvals/{id}/approve
+AuthService -> Auth DB: set user IsActive=true
+AuthService -> Auth DB: add role Retailer
+AuthService -> Business API: POST /retailers (create retailer)
+Business API -> Business DB: insert retailer
+Business API -> AuthService: retailerId
+AuthService -> Auth DB: store user.RetailerId
+AuthService -> Frontend: success
+
+
+D) Login (Approved User)
+
+User -> Frontend: Enter email/password
+Frontend -> AuthService: POST /auth/login
+AuthService -> Auth DB: verify password + IsActive
+AuthService -> Auth DB: create refresh token
+AuthService -> Frontend: JWT + refreshToken + user
+Frontend -> User: redirect /app/dashboard
+
+
+E) Login (Pending User)
+
+User -> Frontend: Enter email/password
+Frontend -> AuthService: POST /auth/login
+AuthService -> Auth DB: IsActive=false
+AuthService -> Auth DB: check pending approval request
+AuthService -> Frontend: 401 "Account pending approval"
+Frontend -> User: show message

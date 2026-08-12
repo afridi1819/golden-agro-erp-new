@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golden Agro Foods</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            color: #ffd700;
+        }
+
+        header {
+            background-color: #ffd700;
+            color: #000;
+            padding: 20px;
+            text-align: center;
+        }
+
+        nav ul {
+            list-style: none;
+            background-color: #222;
+            display: flex;
+            justify-content: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        nav ul li {
+            padding: 15px 25px;
+        }
+
+        nav ul li a {
+            color: #ffd700;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        nav ul li a:hover {
+            color: #fff;
+        }
+
+        section {
+            padding: 30px;
+            max-width: 800px;
+            margin: auto;
+        }
+
+        h2 {
+            color: #ffcc00;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background-color: #111;
+            padding: 20px;
+            border-radius: 10px;
+            width: 300px;
+            margin: 40px auto;
+        }
+
+        label {
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        input {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #222;
+            color: #fff;
+        }
+
+        input::placeholder {
+            color: #aaa;
+        }
+
+        button {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #ffd700;
+            color: #000;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            align-self: center;
+            width: 100px;
+        }
+
+        button:hover {
+            background-color: #e6c200;
+        }
+
+        footer {
+            background-color: #ffd700;
+            color: #000;
+            text-align: center;
+            padding: 10px;
+            margin-top: 40px;
+        }
+
+        img {
+            display: block;
+            margin: 20px auto;
+            border-radius: 10px;
+            max-width: 100%;
+            border: 3px solid #ffd700;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Golden Agro Foods</h1>
+        <p>Refreshing the Nation, Naturally</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="products.html" target="_blank">Products</a></li>
+            <li><a href="ourfactory.html" target="_blank">Our Factory</a></li>
+            <li><a href="contact.html" target="_blank">Contact</a></li>
+        </ul>
+    </nav>
+
+    <section id="cold-drinks">
+        <h2>Cold Drinks</h2>
+        <p>We produce a wide range of refreshing cold drinks including:</p>
+        <ul>
+            <li>Pio-Mango – Real mango juice-based drink</li>
+            <li>Pio-Lemon Spark – Zesty lemon soda</li>
+            <li>Pio-Orange Rush – Pulpy orange delight</li>
+            <li>Pio-Jeera Soda – Traditional spiced refreshment</li>
+        </ul>
+    </section>
+
+    <section id="factory">
+        <h2>Our Factory</h2>
+        <p>Located in the heart of India, our factory is equipped with modern machinery and adheres to strict hygiene
+            standards. We ensure quality control at every stage of production to deliver the best to our customers.</p>
+    </section>
+
+    <section id="products">
+        <h2>Our Products</h2>
+        <p>Besides cold drinks, we also offer:</p>
+        <ul>
+            <li>Packaged Fruit Juices</li>
+            <li>Flavored Mineral Water</li>
+            <li>Organic Syrups</li>
+            <li>Custom Beverage Solutions for retailers</li>
+        </ul>
+        <img src="WhatsApp Image 2025-08-02 at 21.40.36_0a675905.jpg" alt="Golden Agro Product">
+    </section>
+
+    <section id="newsletter">
+        <form action="">
+            <h2 style="text-align: center; color: #ffd700;">Join for Updates</h2>
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" placeholder="Enter your name">
+
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="Enter your email">
+
+            <button type="submit">Submit</button>
+        </form>
+    </section>
+
+    <footer>
+        <p>&copy; 2025 Golden Agro Foods. All rights reserved.</p>
+    </footer>
+
+</body>
+
+</html>

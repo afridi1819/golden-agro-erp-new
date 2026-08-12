@@ -1,0 +1,90 @@
+CLASS DIAGRAM (HIGH LEVEL, TEXT ONLY)
+
+AUTH SERVICE (.NET)
+
+[ApplicationUser : IdentityUser]
+  - FirstName
+  - LastName
+  - RetailerId
+  - IsActive
+  - CreatedAt
+
+[RefreshToken]
+  - Id
+  - Token
+  - UserId
+  - ExpiryDate
+  - IsRevoked
+
+[ApprovalRequest]
+  - Id
+  - UserId
+  - RequestedRole
+  - Status
+  - RequestedAt
+  - ExpiresAt
+  - DecidedAt
+  - DecidedByUserId
+  - DecisionNote
+  - (Retailer fields)
+
+[ApplicationDbContext]
+  - DbSet<RefreshToken>
+  - DbSet<ApprovalRequest>
+
+[AuthController]
+  -> uses UserManager<ApplicationUser>
+  -> uses RoleManager<IdentityRole>
+  -> uses TokenService
+  -> uses BusinessApiService
+  -> uses ApplicationDbContext
+
+[ApprovalsController]
+  -> reads ApprovalRequest
+  -> approve/reject
+  -> activates user + assigns role
+
+[AdminManufacturersController]
+  -> list/create/update/deactivate Manufacturer users
+
+[TokenService]
+  -> GenerateAccessToken(user, role)
+  -> GenerateRefreshToken()
+  -> GetPrincipalFromExpiredToken(token)
+
+[BusinessApiService]
+  -> CreateRetailerAsync(...)
+
+Relationships:
+ApplicationUser 1 --- * RefreshToken
+ApplicationUser 1 --- * ApprovalRequest
+Controllers --> Services/DbContext
+
+
+BUSINESS API (SPRING)
+
+[Controllers] -> [Services] -> [Repositories] -> [Entities]
+
+Example:
+[PurchaseController] -> [PurchaseService] -> [PurchaseRepository] -> [Purchase]
+[ExpenseController]  -> [ExpenseService]  -> [ExpenseRepository]  -> [Expense]
+[DashboardController] -> (repositories) -> aggregates
+
+
+FRONTEND (REACT)
+
+[AuthContext]
+  - user
+  - login()
+  - register()
+  - logout()
+  - isAdmin/isManufacturer/isRetailer
+
+Pages:
+[Register] -> uses AuthContext.register
+[Login]    -> uses AuthContext.login
+[Users(Requests)] -> uses authApi.getPendingApprovals/approve/reject
+[Manufacturers(Admin)] -> uses authApi.admin manufacturers APIs
+
+Shared UI:
+[PasswordInput] used by Login/Register/Settings

@@ -1,0 +1,115 @@
+# =====================
+# OS files
+# =====================
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# =====================
+# IDE / Editor
+# =====================
+.vs/
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.iml
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Workspace metadata
+.metadata/
+
+# =====================
+# .NET / ASP.NET
+# =====================
+**/bin/
+**/obj/
+*.pdb
+*.cache
+*.log
+*.nupkg
+*.snupkg
+
+# =====================
+# Java / Maven / Gradle
+# =====================
+**/target/
+**/build/
+
+# Maven wrapper
+**/.mvn/wrapper/maven-wrapper.jar
+
+# Eclipse/STS
+**/.gradle/
+**/.classpath
+**/.project
+**/.settings/
+**/.apt_generated/
+**/.factorypath
+**/.springBeans
+**/.sts4-cache/
+
+# =====================
+# Node / React
+# =====================
+**/node_modules/
+**/dist/
+**/dist-ssr/
+**/.vite/
+**/.cache/
+
+logs/
+*.local
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# =====================
+# Environment / Secrets (DO NOT COMMIT)
+# =====================
+.env
+.env.*
+!.env.example
+
+# AuthService local config (contains secrets in this repo)
+AuthService/appsettings.json
+AuthService/appsettings.Development.json
+
+# Business API local config (contains secrets in this repo)
+business-api/src/main/resources/application.yml
+business-api/src/main/resources/application.properties
+
+# If you want to commit templates, create:
+# - AuthService/appsettings.example.json
+# - business-api/src/main/resources/application.example.yml
+
+# =====================
+# Docker
+# =====================
+*.tar
+*.tar.gz
+
+# =====================
+# SSL Certificates
+# =====================
+*.pem
+*.key
+*.crt
+
+# =====================
+# Database Backups
+# =====================
+*.sql
+*.dump
+
+# =====================
+# Coverage Reports
+# =====================
+coverage/
+
+# ASP.NET launch settings
+**/Properties/launchSettings.json

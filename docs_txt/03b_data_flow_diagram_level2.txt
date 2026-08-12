@@ -1,0 +1,106 @@
+DATA FLOW DIAGRAM (DFD) - LEVEL 2 (TEXT ONLY)
+
+Scope:
+- Break down key processes into sub-processes with data stores.
+
+Legend:
+[P#] = Process
+[D#] = Data Store
+[E#] = External Entity
+
+External Entities:
+[E1] User Browser
+[E2] Admin/Manufacturer Approver
+[E3] Business API (Spring Boot)
+
+Data Stores:
+[D1] Auth DB (Users, RefreshTokens, ApprovalRequests)
+[D2] Business DB (Suppliers, Purchases, Products, Orders, Expenses, etc.)
+
+
+P1: Registration Request Processing (AuthService)
+
+[E1] -> [P1.1 Collect Registration Form (Frontend)]
+[P1.1] -> [P1.2 Submit Registration (AuthService /auth/register)] : {email, password, firstName, lastName, requestedRole, retailerFields}
+
+[P1.2] -> [P1.3 Validate Request]
+[P1.3] -> [P1.4 Check Bootstrap Rule (Admin exists?)]
+
+IF bootstrap:
+  [P1.4] -> [P1.5 Create Admin User]
+  [P1.5] -> [D1] : insert Users(IsActive=true)
+  [P1.5] -> [D1] : insert ApprovalRequests(Status=Approved)
+  [P1.5] -> [P1.6 Generate Tokens]
+  [P1.6] -> [D1] : insert RefreshTokens
+  [P1.6] -> [E1] : JWT + refreshToken
+
+ELSE pending:
+  [P1.4] -> [P1.7 Create Inactive User]
+  [P1.7] -> [D1] : insert Users(IsActive=false)
+  [P1.7] -> [P1.8 Create ApprovalRequest]
+  [P1.8] -> [D1] : insert ApprovalRequests(Status=Pending, ExpiresAt=+24h)
+  [P1.8] -> [E1] : message "pending approval"
+
+
+P2: Approval Decision (AuthService)
+
+[E2] -> [P2.1 View Requests (Frontend / Requests page)]
+[P2.1] -> [P2.2 Fetch Pending Requests (AuthService /approvals)]
+[P2.2] -> [D1] : read ApprovalRequests(Status=Pending)
+[P2.2] -> [P2.3 Expire Old Requests]
+[P2.3] -> [D1] : update ApprovalRequests(Status=Expired where ExpiresAt < now)
+[P2.2] -> [E2] : pending list
+
+Approve flow:
+[E2] -> [P2.4 Approve Request]
+[P2.4] -> [D1] : update ApprovalRequests(Status=Approved, DecidedAt, DecidedBy)
+[P2.4] -> [P2.5 Activate User + Assign Role]
+[P2.5] -> [D1] : update Users(IsActive=true)
+[P2.5] -> [D1] : add UserRole mapping (Identity tables)
+
+If requestedRole == Retailer:
+  [P2.5] -> [P2.6 Sync Retailer to Business API]
+  [P2.6] -> [E3] : POST /api/retailers
+  [E3] -> [D2] : insert retailers
+  [E3] -> [P2.6] : retailerId
+  [P2.6] -> [D1] : update Users(RetailerId)
+
+Reject flow:
+[E2] -> [P2.7 Reject Request]
+[P2.7] -> [D1] : update ApprovalRequests(Status=Rejected, DecidedAt, DecidedBy)
+[P2.7] -> [D1] : update Users(IsActive=false)
+
+
+P3: Login / Session (AuthService)
+
+[E1] -> [P3.1 Submit Login]
+[P3.1] -> [P3.2 Validate Credentials]
+[P3.2] -> [D1] : read Users + verify password hash
+
+If IsActive=false:
+  [P3.2] -> [D1] : read ApprovalRequests(UserId, Status=Pending, ExpiresAt)
+  [P3.2] -> [E1] : 401 "pending approval" OR "deactivated"
+
+If IsActive=true:
+  [P3.2] -> [P3.3 Generate JWT + RefreshToken]
+  [P3.3] -> [D1] : insert RefreshTokens
+  [P3.3] -> [E1] : JWT + refreshToken
+
+
+P4: ERP Operations (Business API)
+
+[E1] -> [P4.1 Frontend calls Business API endpoints]
+[P4.1] -> [E3] : REST calls with Bearer JWT
+[E3] -> [P4.2 Validate JWT (JwtAuthFilter)]
+[P4.2] -> [P4.3 Authorize (roles)]
+[P4.3] -> [D2] : CRUD operations
+[D2] -> [E3] : results
+[E3] -> [E1] : JSON responses
+
+
+P5: Dashboard Analytics (Business API)
+
+[E1] -> [P5.1 Fetch Dashboard Stats]
+[P5.1] -> [E3] : GET /api/dashboard/stats, /profit-trend, /expense-breakdown
+[E3] -> [D2] : aggregate queries (sales, expenses, profit)
+[E3] -> [E1] : stats + chart datasets

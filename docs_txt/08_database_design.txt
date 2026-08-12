@@ -1,0 +1,99 @@
+DATABASE DESIGN (TEXT)
+
+A) Auth Database: goldenagro_auth (MySQL)
+
+A1) Users (ASP.NET Identity table renamed to "Users")
+- Purpose: store application user accounts (Admin/Manufacturer/Retailer) and auth flags.
+- Primary Key: Id (string, Identity)
+- Important Columns:
+  - Id (PK)
+  - UserName, NormalizedUserName
+  - Email, NormalizedEmail
+  - PasswordHash
+  - FirstName, LastName
+  - RetailerId (int?, link to business DB retailer)
+  - IsActive (bool)
+  - CreatedAt (datetime)
+  - Security stamps / lockout fields (Identity)
+
+A2) RefreshTokens
+- Purpose: store refresh tokens for JWT session renewal.
+- PK: Id (int)
+- FK: UserId -> Users.Id
+- Columns:
+  - Id (PK)
+  - Token (string)
+  - UserId (FK)
+  - ExpiryDate (datetime)
+  - IsRevoked (bool)
+
+A3) ApprovalRequests
+- Purpose: store pending registration requests with 24h expiry and decision audit.
+- PK: Id (int)
+- FK: UserId -> Users.Id
+- Columns:
+  - Id (PK)
+  - UserId (FK)
+  - RequestedRole (Manufacturer/Retailer)
+  - Status (Pending/Approved/Rejected/Expired)
+  - RequestedAt (datetime)
+  - ExpiresAt (datetime)
+  - DecidedAt (datetime?)
+  - DecidedByUserId (string?)
+  - DecisionNote (string?)
+  - ShopName, Phone, Address, GstNumber (retailer fields)
+
+Indexes / Constraints:
+- IX_ApprovalRequests_UserId
+- FK_ApprovalRequests_Users_UserId ON DELETE CASCADE
+
+
+B) Business Database: goldenagro_business (MySQL)
+
+(High-level table design; exact columns may differ based on JPA entities.)
+
+B1) Master Data
+- units (unitId PK)
+- categories (categoryId PK)
+- taxes (taxId PK)
+
+B2) Supplier & Purchases
+- suppliers (supplierId PK)
+- purchases (purchaseId PK, supplier_id FK -> suppliers)
+- purchase_items (purchaseItemId PK, purchase_id FK -> purchases, raw_material_id FK -> raw_materials)
+
+B3) Raw Materials
+- raw_materials (rawMaterialId PK, unit_id FK -> units)
+  - stockQuantity, reorderLevel
+
+B4) Products & BOM
+- products (productId PK, category_id FK -> categories, tax_id FK -> taxes)
+- bills_of_material (bomId PK, product_id FK -> products)
+- bom_items (bomItemId PK, bom_id FK -> bills_of_material, raw_material_id FK -> raw_materials)
+
+B5) Production
+- production_orders (productionOrderId PK, product_id FK -> products, retailer_order_id FK -> retailer_orders)
+- finished_goods_stock (stockId PK, product_id FK -> products)
+
+B6) Retailers & Orders
+- retailers (retailerId PK, authUserId (string) - link back to AuthService user)
+- retailer_orders (retailerOrderId PK, retailer_id FK -> retailers)
+- retailer_order_items (retailerOrderItemId PK, retailer_order_id FK -> retailer_orders, product_id FK -> products)
+- invoices (invoiceId PK, retailer_order_id FK -> retailer_orders, retailer_id FK -> retailers)
+
+B7) Expenses
+- expenses (expenseId PK)
+  - description, amount, category, expense_date
+
+Key Relationships:
+- suppliers 1 -> many purchases
+- purchases 1 -> many purchase_items
+- raw_materials 1 -> many purchase_items
+- products 1 -> many bom
+- bom 1 -> many bom_items
+- retailers 1 -> many retailer_orders
+- retailer_orders 1 -> many retailer_order_items
+- retailer_orders 1 -> many production_orders (link)
+
+Notes:
+- Purchases are also recorded as Expenses when completed (so dashboards include them as cost).

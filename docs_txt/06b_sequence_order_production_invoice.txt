@@ -1,0 +1,82 @@
+SEQUENCE DIAGRAM (TEXT ONLY)
+ORDER -> PRODUCTION -> INVOICE
+
+Actors/Systems:
+- Retailer (user)
+- Frontend (React)
+- AuthService (.NET)
+- Business API (Spring Boot)
+- Business DB (MySQL)
+
+
+1) Retailer Login and Token
+Retailer -> Frontend: Login(email,password)
+Frontend -> AuthService: POST /auth/login
+AuthService -> Auth DB: validate + IsActive
+AuthService -> Frontend: JWT (role=Retailer, retailer_id=...)
+Frontend -> Retailer: login success
+
+
+2) Retailer Browses Products
+Retailer -> Frontend: open Products
+Frontend -> Business API: GET /products/active (Bearer JWT)
+Business API -> Business DB: select products
+Business API -> Frontend: products list
+Frontend -> Retailer: show products
+
+
+3) Retailer Places Order
+Retailer -> Frontend: Add to cart + Checkout
+Frontend -> Business API: POST /orders (Bearer JWT) {items, quantities}
+Business API -> Business API: JwtAuthFilter extracts retailer_id
+Business API -> Business DB: insert retailer_orders(status=pending)
+Business API -> Business DB: insert retailer_order_items
+Business API -> Frontend: order created
+Frontend -> Retailer: show order placed
+
+
+4) Manufacturer Sees Pending Reminder and Views Orders
+Manufacturer -> Frontend: open Dashboard
+Frontend -> Business API: GET /orders (Bearer JWT, role=Manufacturer/Admin)
+Business API -> Business DB: select orders
+Business API -> Frontend: orders
+Frontend -> Manufacturer: show pending reminder (once) + list
+
+Manufacturer -> Frontend: click View Orders
+Frontend -> Business API: GET /orders
+Business API -> Frontend: orders list
+Frontend -> Manufacturer: show orders
+
+
+5) Manufacturer Confirms Order
+Manufacturer -> Frontend: click Confirm Order
+Frontend -> Business API: POST /orders/{id}/confirm
+Business API -> Business DB: update retailer_orders(status=confirmed)
+Business API -> Business DB: deduct finished goods stock (if implemented)
+Business API -> Frontend: confirm success
+Frontend -> Manufacturer: show confirmed
+
+
+6) Production Planning/Creation (if stock insufficient or as workflow)
+Manufacturer -> Frontend: create production from retailer order
+Frontend -> Business API: POST /production/from-retailer-order/{retailerOrderId}
+Business API -> Business DB: create production_orders linked to retailerOrder
+Business API -> Business DB: (start/complete) deduct raw materials per BOM and add finished goods
+Business API -> Frontend: production created
+Frontend -> Manufacturer: show production order
+
+
+7) Invoice Generation
+Manufacturer -> Frontend: generate invoice
+Frontend -> Business API: POST /invoices/from-order/{orderId}
+Business API -> Business DB: insert invoice
+Business API -> Frontend: invoice created
+Frontend -> Manufacturer: show invoice
+
+
+8) Retailer Views Invoice/Order Status
+Retailer -> Frontend: view my orders/invoices
+Frontend -> Business API: GET /orders/my-orders (Bearer JWT)
+Business API -> Business DB: select orders by retailer_id
+Business API -> Frontend: my orders
+Frontend -> Retailer: show status and invoice reference

@@ -1,0 +1,45 @@
+USE CASE DIAGRAM (TEXT ONLY)
+
+Actors:
+- Admin
+- Manufacturer (Approved)
+- Retailer (Approved)
+- Unregistered User (Applicant)
+- Business API (External system for retailer sync)
+
+
+                    +-------------------------------------------+
+                    |           GoldenAgro ERP System            |
+                    +-------------------------------------------+
+
+Unregistered User --> (Register with requestedRole)
+                      (Submit Approval Request)
+
+Admin --------------> (View Pending Requests)
+Admin --------------> (Approve/Reject Manufacturer Requests)
+Admin --------------> (Approve/Reject Retailer Requests)
+Admin --------------> (Manage Manufacturers: add/edit/deactivate)
+Admin --------------> (All Manufacturer Functions)
+
+Manufacturer --------> (View Pending Requests - Retailer only)
+Manufacturer --------> (Approve/Reject Retailer Requests)
+Manufacturer --------> (Manage Suppliers)
+Manufacturer --------> (Manage Raw Materials)
+Manufacturer --------> (Create/Complete Purchases)
+Manufacturer --------> (Create/Manage Products)
+Manufacturer --------> (Manage BOM)
+Manufacturer --------> (Manage Production Orders)
+Manufacturer --------> (Manage Expenses)
+Manufacturer --------> (View Dashboard Analytics)
+Manufacturer --------> (View/Confirm Orders)
+
+Retailer ------------> (Login)
+Retailer ------------> (Browse Products)
+Retailer ------------> (Add to Cart)
+Retailer ------------> (Checkout - Dummy Payment)
+Retailer ------------> (Place Order)
+Retailer ------------> (View My Orders)
+
+System --------------> (Sync Retailer to Business API after approval) --> Business API
+System --------------> (Generate JWT / Refresh Token)
+System --------------> (Role-based Access Control)

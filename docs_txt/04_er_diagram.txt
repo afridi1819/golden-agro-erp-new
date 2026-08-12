@@ -1,0 +1,94 @@
+ER DIAGRAM (TEXT ONLY)
+
+AUTH DB (goldenagro_auth)
+
+[Users]
+  PK: Id
+  Fields: Email, FirstName, LastName, RetailerId, IsActive, CreatedAt, ...
+
+[RefreshTokens]
+  PK: Id
+  FK: UserId -> Users.Id
+  Fields: Token, ExpiryDate, IsRevoked
+
+[ApprovalRequests]
+  PK: Id
+  FK: UserId -> Users.Id
+  Fields: RequestedRole, Status, RequestedAt, ExpiresAt, DecidedAt, DecidedByUserId, DecisionNote,
+          ShopName, Phone, Address, GstNumber
+
+Relationships:
+Users 1 ---- * RefreshTokens
+Users 1 ---- * ApprovalRequests
+
+
+BUSINESS DB (goldenagro_business) - core ERP
+
+[Suppliers]
+  PK: supplierId
+
+[Purchases]
+  PK: purchaseId
+  FK: supplier_id -> Suppliers.supplierId
+
+[PurchaseItems]
+  PK: purchaseItemId
+  FK: purchase_id -> Purchases.purchaseId
+  FK: raw_material_id -> RawMaterials.rawMaterialId
+
+[RawMaterials]
+  PK: rawMaterialId
+  FK: unit_id -> Units.unitId
+
+[Products]
+  PK: productId
+  FK: category_id -> Categories.categoryId
+  FK: tax_id -> Taxes.taxId
+
+[BillsOfMaterial]
+  PK: bomId
+  FK: product_id -> Products.productId
+
+[BomItems]
+  PK: bomItemId
+  FK: bom_id -> BillsOfMaterial.bomId
+  FK: raw_material_id -> RawMaterials.rawMaterialId
+
+[ProductionOrders]
+  PK: productionOrderId
+  FK: product_id -> Products.productId
+  FK: retailer_order_id -> RetailerOrders.retailerOrderId (link)
+
+[FinishedGoodsStock]
+  PK: stockId
+  FK: product_id -> Products.productId
+
+[Retailers]
+  PK: retailerId
+  Fields: authUserId (links to AuthService user), shopName, status, ...
+
+[RetailerOrders]
+  PK: retailerOrderId
+  FK: retailer_id -> Retailers.retailerId
+
+[RetailerOrderItems]
+  PK: retailerOrderItemId
+  FK: retailer_order_id -> RetailerOrders.retailerOrderId
+  FK: product_id -> Products.productId
+
+[Invoices]
+  PK: invoiceId
+  FK: retailer_order_id -> RetailerOrders.retailerOrderId
+  FK: retailer_id -> Retailers.retailerId
+
+[Expenses]
+  PK: expenseId
+  Fields: description, amount, category, date
+
+Relationships (high level):
+Suppliers 1 ---- * Purchases 1 ---- * PurchaseItems * ---- 1 RawMaterials
+Products 1 ---- * BillsOfMaterial 1 ---- * BomItems * ---- 1 RawMaterials
+Retailers 1 ---- * RetailerOrders 1 ---- * RetailerOrderItems * ---- 1 Products
+RetailerOrders 1 ---- * Invoices
+RetailerOrders 1 ---- * ProductionOrders
+Products 1 ---- * FinishedGoodsStock

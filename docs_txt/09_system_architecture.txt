@@ -1,0 +1,58 @@
+SYSTEM ARCHITECTURE (TEXT)
+
+Architecture Style:
+- 3-tier + service split (Frontend + Auth Service + Business API)
+
+Components:
+
+1) React Frontend (Vite)
+- Provides UI for Admin/Manufacturer/Retailer
+- Stores JWT and user profile in localStorage (token, refreshToken, user)
+- Calls AuthService for authentication/approvals/manufacturer management
+- Calls Business API for ERP operations
+
+2) AuthService (.NET)
+- Handles:
+  - Registration (as approval request)
+  - Login (JWT + refresh token)
+  - Password change
+  - Approval workflow (approve/reject)
+  - Admin manufacturer management
+  - Retailer sync to Business API upon approval
+- Database: goldenagro_auth (MySQL)
+
+3) Business API (Spring Boot)
+- Handles ERP operations:
+  - Products, suppliers, purchases, raw materials, BOM, production, orders, invoices, expenses, dashboard analytics
+- Validates JWT issued by AuthService
+- Database: goldenagro_business (MySQL)
+
+Data Stores:
+- MySQL (Auth DB)
+- MySQL (Business DB)
+
+Key Flows:
+
+A) Registration approval flow
+Frontend -> AuthService: register(requestedRole)
+AuthService -> Auth DB: create user inactive + approval request
+Admin/Manufacturer -> AuthService: approve
+AuthService -> Auth DB: activate + assign role
+If retailer:
+AuthService -> Business API: create retailer
+Business API -> Business DB: save retailer
+AuthService -> Auth DB: store retailerId and JWT includes retailer_id
+
+B) Authenticated ERP flow
+Frontend -> AuthService: login -> JWT
+Frontend -> Business API: ERP requests with Authorization: Bearer <JWT>
+Business API -> Business DB: CRUD and analytics
+
+Deployment (typical dev)
+- Frontend: http://localhost:5173
+- AuthService: https://localhost:7075
+- Business API: http://localhost:8080
+
+Security Boundaries
+- AuthService is the source of truth for identity, roles, and approval.
+- Business API trusts JWT claims (role + retailer_id) for authorization.

@@ -1,0 +1,258 @@
+GOLDENAGRO ERP – POSSIBLE INTERVIEW / VIVA QUESTIONS WITH ANSWERS
+
+NOTE:
+- This file mixes theory + code-specific questions.
+- File paths are referenced so you can point to “where it is implemented”.
+
+
+SECTION A — PROJECT OVERVIEW / ARCHITECTURE
+
+Q1) What is the project about?
+A) A manufacturer–retailer ERP system that manages suppliers, raw materials, purchases, BOM, production, orders, invoices, expenses, and dashboards. It has a separate AuthService (.NET) for authentication/roles and a Business API (Spring Boot) for ERP domain logic, plus a React frontend.
+
+Q2) Why did you split the system into AuthService and Business API?
+A) Separation of concerns:
+- AuthService (.NET): identity, login/JWT, roles, approvals.
+- Business API (Spring): ERP business domain.
+This makes security easier and allows future roles/features without mixing ERP logic with authentication logic.
+
+Q3) Describe the system architecture in one line.
+A) React frontend -> AuthService (.NET) for identity/approval + Business API (Spring Boot) for ERP, both backed by MySQL.
+
+Q4) What databases are used?
+A) Two logical schemas:
+- goldenagro_auth (Auth DB)
+- goldenagro_business (Business DB)
+
+Q5) Where is the system architecture documented?
+A) docs_txt/09_system_architecture.txt
+
+
+SECTION B — TECHNOLOGY STACK
+
+Q6) Why React + Vite for frontend?
+A) Fast dev server/HMR, modern build system, easy component-based UI, and good ecosystem.
+Code: golden-agro-frontend/package.json, golden-agro-frontend/vite.config.js
+
+Q7) Why Spring Boot for Business API?
+A) Strong ecosystem for REST APIs, Spring Data JPA for DB operations, Spring Security for RBAC, and good maintainability for domain-heavy ERP logic.
+Code: business-api/pom.xml
+
+Q8) Why ASP.NET Identity in AuthService?
+A) Secure user management, password hashing, roles, token generation integration, and mature features like lockouts and security stamps.
+Code: AuthService/Program.cs (AddIdentity), AuthService/Models/ApplicationUser.cs
+
+Q9) Why JWT?
+A) Stateless auth across services; Business API can validate the token without calling AuthService for every request.
+Code:
+- AuthService/Services/TokenService.cs (JWT generation)
+- business-api/src/main/java/com/goldenagro/config/JwtAuthFilter.java (JWT validation)
+
+Q10) Why TanStack React Query?
+A) Simplifies data fetching, caching, automatic refetching, and query invalidation after mutations.
+Code: many pages use useQuery/useMutation (e.g., golden-agro-frontend/src/pages/Expenses.jsx)
+
+
+SECTION C — AUTHENTICATION / APPROVAL WORKFLOW
+
+Q11) How does registration work now?
+A) Registration creates a user + an approval request. Only after approval does the user become active and get a role.
+Code: AuthService/Controller/AuthController.cs (Register)
+
+Q12) What is “requestedRole” and why is it used?
+A) User selects a role at signup but it is treated as a “requested role” until Admin/Manufacturer approves. This supports future roles and prevents privilege abuse.
+Code: AuthService/Controller/AuthController.cs (Register), AuthService/Models/ApprovalRequest.cs
+
+Q13) What is the bootstrap admin rule?
+A) If no Admin exists and someone registers with requestedRole=Manufacturer, they become Admin immediately.
+Code: AuthService/Controller/AuthController.cs (isBootstrapAdmin logic)
+
+Q14) How is approval request expiry handled?
+A) Requests expire after 24 hours. When listing pending requests, expired ones are marked “Expired”.
+Code: AuthService/Controller/ApprovalsController.cs (GetPending)
+
+Q15) Who can approve what?
+A)
+- Manufacturer requests: Admin only.
+- Retailer requests: Admin or Manufacturer.
+Code: AuthService/Controller/ApprovalsController.cs
+
+Q16) Where is the approval request stored?
+A) In Auth DB table ApprovalRequests.
+Code:
+- AuthService/Models/ApprovalRequest.cs
+- AuthService/Data/ApplicationDbContext.cs (DbSet + config)
+- AuthService/Migrations/*AddApprovalRequests*
+
+Q17) What happens when a pending user tries to login?
+A) Login is blocked and message shows “Account pending approval”.
+Code: AuthService/Controller/AuthController.cs (Login IsActive check)
+
+Q18) Where is the “Requests” approval UI page?
+A)
+- Frontend page: golden-agro-frontend/src/pages/Users.jsx
+- Route: /app/users
+- Menu: golden-agro-frontend/src/components/Layout/sidebar.jsx
+
+Q19) Why did you change axios 401 redirect behavior?
+A) To allow login/register pages to show server error messages (like “pending approval”) instead of force redirect loops.
+Code: golden-agro-frontend/src/api/axios.js
+
+
+SECTION D — ADMIN MANUFACTURER MANAGEMENT
+
+Q20) How can Admin manage manufacturers?
+A) Admin has a Manufacturers page to create/edit/deactivate manufacturer accounts.
+Frontend:
+- golden-agro-frontend/src/pages/Manufacturers.jsx
+- Route: /app/manufacturers
+Backend:
+- AuthService/Controller/AdminManufacturersController.cs
+
+Q21) Why use deactivate instead of delete?
+A) Keeps history and avoids breaking references/audit trails. It’s safer and common in real systems.
+Code: AuthService/Models/ApplicationUser.cs (IsActive), AdminManufacturersController SetActive endpoint
+
+Q22) What API endpoints manage manufacturers?
+A)
+- GET /api/admin/manufacturers
+- POST /api/admin/manufacturers
+- PUT /api/admin/manufacturers/{id}
+- POST /api/admin/manufacturers/{id}/active
+Code: AuthService/Controller/AdminManufacturersController.cs
+
+
+SECTION E — BUSINESS LOGIC / ERP
+
+Q23) What are core ERP modules implemented?
+A) Suppliers, raw materials, purchases, BOM, production, orders, invoices, expenses, dashboard analytics.
+Code: business-api/src/main/java/com/goldenagro/controller/*
+
+Q24) How did you ensure supplier phone accepts only digits and exactly 10?
+A) Implemented both frontend restriction + backend normalization/validation.
+Code:
+- Frontend: golden-agro-frontend/src/pages/Suppliers.jsx
+- Backend: business-api/src/main/java/com/goldenagro/controller/SupplierController.java
+
+Q25) How did you implement show/hide password (eye icon)?
+A) Built a reusable PasswordInput component and used it in Login/Register/Settings.
+Code:
+- golden-agro-frontend/src/components/common/PasswordInput.jsx
+- used in: pages/auth/Login.jsx, pages/auth/Register.jsx, pages/Settings.jsx
+
+Q26) How did you hide login/register after login?
+A) Navbar already conditionally renders based on AuthContext user state; Landing page CTA also changes to Dashboard.
+Code:
+- golden-agro-frontend/src/components/Navbar.jsx
+- golden-agro-frontend/src/pages/LandingPage.jsx
+
+Q27) How is Purchase included in Expenses?
+A) Completing a purchase auto-creates an Expense record in the Business DB.
+Code:
+- business-api/src/main/java/com/goldenagro/service/PurchaseService.java (completePurchase)
+
+Q28) Will updating expenses update profit/loss graph?
+A) Yes. Profit trend is computed from dashboard endpoints; frontend invalidates dashboard queries after expense changes.
+Code:
+- Backend profit endpoints: business-api/src/main/java/com/goldenagro/controller/DashboardController.java
+- Frontend invalidation: golden-agro-frontend/src/pages/Expenses.jsx
+
+Q29) How did you make dashboard “pending order reminder” show only once?
+A) Store last-seen pending count in localStorage and show the reminder only when pending count increases.
+Code: golden-agro-frontend/src/pages/Dashboard.jsx
+
+Q30) Why remove “Add Retailer” button from manufacturer/admin side?
+A) Retailers should enter via approval workflow; direct creation can bypass approvals.
+Code: golden-agro-frontend/src/pages/Retailers.jsx
+
+
+SECTION F — SECURITY QUESTIONS
+
+Q31) How do you prevent users from registering as Admin?
+A) Public register endpoint only accepts Manufacturer/Retailer as requestedRole.
+Code: AuthService/Controller/AuthController.cs (validRequestedRoles)
+
+Q32) How is password stored?
+A) Password is hashed using ASP.NET Identity’s PasswordHasher; not stored in plain text.
+Code: Identity in AuthService/Program.cs; user creation via UserManager.
+
+Q33) How do you handle JWT claim compatibility between .NET and Spring?
+A) .NET includes role in ClaimTypes.Role and user_id; Spring filter reads both standard and .NET-mapped role claim (schema claim URI).
+Code:
+- AuthService/Services/TokenService.cs
+- business-api/src/main/java/com/goldenagro/config/JwtAuthFilter.java
+
+Q34) What should be improved for secrets?
+A) Move DB passwords and JWT secrets from appsettings/application.yml into environment variables or a secret manager.
+Code: AuthService/appsettings.json, business-api/src/main/resources/application.yml
+
+
+SECTION G — TESTING QUESTIONS
+
+Q35) What kinds of tests would you write?
+A)
+- Unit tests: TokenService, approval rules, PurchaseService expense creation.
+- Integration tests: Register->Approval->Login, JWT authorization.
+- E2E tests: full workflow (retailer order, manufacturer confirm, production, invoice).
+
+Q36) Where would you add tests in this repo?
+A)
+- AuthService: create a new test project like AuthService.Tests (xUnit) alongside AuthService.
+- Business API: src/test/java with JUnit + SpringBootTest.
+- Frontend: add Vitest/React Testing Library under golden-agro-frontend/src/**/__tests__.
+
+Q37) Did you add automated tests today?
+A) No automated unit tests were added. We validated changes via builds and linting.
+Commands used:
+- dotnet build AuthService/AuthService.csproj
+- npm run lint/build (frontend)
+
+Q38) What manual test cases should be executed?
+A)
+- Bootstrap admin registration
+- Manufacturer registration -> pending -> Admin approves -> manufacturer can login
+- Retailer registration -> pending -> Manufacturer approves -> retailer can login and place order
+- Complete purchase -> expense auto created -> dashboard profit changes
+
+
+SECTION H — DATABASE / MIGRATIONS
+
+Q39) What is dotnet-tools.json and why is it there?
+A) It pins local tools (dotnet-ef) so migrations can be run consistently without a global install.
+Code: dotnet-tools.json (repo root)
+
+Q40) What migration did you add for approvals?
+A) AddApprovalRequests migration creating ApprovalRequests table.
+Code: AuthService/Migrations/*AddApprovalRequests*
+
+
+SECTION I — CODE QUALITY / MAINTAINABILITY
+
+Q41) How do you keep UI consistent for password inputs?
+A) A shared PasswordInput component is used everywhere instead of duplicating logic.
+Code: golden-agro-frontend/src/components/common/PasswordInput.jsx
+
+Q42) How do you avoid stale UI after API changes?
+A) Use react-query invalidateQueries after mutations to refresh dependent screens/charts.
+Example: Expenses page invalidates dashboard queries.
+Code: golden-agro-frontend/src/pages/Expenses.jsx
+
+
+SECTION J — COMMON VIVA QUESTIONS
+
+Q43) Explain difference between authentication and authorization in this project.
+A)
+- Authentication: verifying identity and issuing JWT (AuthService).
+- Authorization: allowing actions based on role claims (both AuthService + Business API).
+
+Q44) What is refresh token and why use it?
+A) Refresh token allows issuing a new JWT without forcing user to login again; reduces exposure of long-lived access tokens.
+Code: AuthService/Models/RefreshToken.cs and AuthController refresh-token endpoint.
+
+Q45) What future improvements would you propose?
+A)
+- Add email/notification for approvals
+- Add audit logs for actions (orders, approvals, deactivations)
+- Add reset-password flow in Admin panel
+- Add automated tests (unit/integration/e2e)
+- Move secrets to environment variables and rotate JWT secrets

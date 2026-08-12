@@ -1,0 +1,58 @@
+DATA FLOW DIAGRAM (DFD) - TEXT ONLY
+
+DFD Level 0 (Context Diagram)
+
+[User Browser]
+   |
+   |  register/login/order/actions
+   v
+[React Frontend]
+   |
+   |  REST calls (JWT)
+   +---------------------> [AuthService (.NET)] --------------------+
+   |                         |                                      |
+   |                         |  user/auth/approvals                 |
+   |                         v                                      |
+   |                      [Auth DB (MySQL)]                         |
+   |                                                                |
+   +---------------------> [Business API (Spring Boot)] ------------+
+                             |         business operations
+                             v
+                         [Business DB (MySQL)]
+
+
+DFD Level 1 (Key Processes)
+
+Process P1: Registration Request
+User -> Frontend -> AuthService
+AuthService -> Auth DB : create User (inactive) + ApprovalRequest (pending)
+AuthService -> Frontend : message "pending approval"
+
+Process P2: Approval
+Admin/Manufacturer -> Frontend -> AuthService (/approvals)
+AuthService -> Auth DB : approve/reject, activate user, assign role
+If Retailer approved:
+AuthService -> Business API : POST /retailers
+Business API -> Business DB : create retailer
+Business API -> AuthService : return retailerId
+AuthService -> Auth DB : store retailerId
+
+Process P3: Login
+User -> Frontend -> AuthService
+AuthService -> Auth DB : verify password + IsActive
+AuthService -> Frontend : JWT + refresh token OR error (pending/deactivated)
+
+Process P4: Business Operations
+Manufacturer/Admin -> Frontend -> Business API (JWT)
+Business API -> Business DB : CRUD suppliers/materials/products/purchases/etc
+Business API -> Frontend : results
+
+Process P5: Purchase Completion -> Expense
+Manufacturer/Admin -> Frontend -> Business API : complete purchase
+Business API -> Business DB : update stock + create Expense entry
+Business API -> Frontend : success
+
+Process P6: Dashboard
+Manufacturer/Admin -> Frontend -> Business API : /dashboard/*
+Business API -> Business DB : aggregate queries
+Business API -> Frontend : stats/trends

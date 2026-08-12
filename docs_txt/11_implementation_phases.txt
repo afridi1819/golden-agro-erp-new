@@ -1,0 +1,58 @@
+IMPLEMENTATION PHASES (FRESHER-FRIENDLY)
+
+Phase 0: Understand Requirements
+- Read ERP_SCHEMA_OVERVIEW.md
+- List modules: Auth, Approval, Suppliers, Purchases, Production, Orders, Dashboard
+- Identify roles and permissions
+
+Phase 1: Setup & Run Locally
+- Start MySQL
+- Run AuthService (.NET)
+- Run Business API (Spring Boot)
+- Run Frontend (Vite)
+- Verify basic login and API connectivity
+
+Phase 2: Authentication (AuthService)
+- Implement register/login/logout/refresh-token
+- Ensure JWT contains role + retailer_id
+- Add IsActive check in login
+
+Phase 3: Approval Workflow (AuthService)
+- Add ApprovalRequests table + migration
+- Change register to create pending request
+- Implement approvals endpoints (approve/reject, 24h expiry)
+- Implement retailer sync only after approval
+
+Phase 4: Admin Features
+- Create manufacturer management endpoints
+- Add Admin UI pages:
+  - Requests page
+  - Manufacturers management page
+
+Phase 5: Core ERP Modules (Business API)
+- Suppliers CRUD
+- Purchases + stock update
+- Expenses CRUD
+- Orders and production
+
+Phase 6: Dashboard Analytics
+- Sales trend
+- Profit trend
+- Expense breakdown
+- Ensure charts refresh when data changes
+
+Phase 7: Frontend UX & Validation
+- Phone number validation
+- Password show/hide
+- Conditional nav items
+- Form validation + toast messages
+
+Phase 8: Stabilization
+- Fix lint/type/build issues
+- Add basic tests
+- Document API usage
+
+Phase 9: Deployment Prep (optional)
+- Move secrets to env variables
+- Configure CORS properly
+- Build frontend and host
