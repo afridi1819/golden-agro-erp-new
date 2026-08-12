@@ -2,9 +2,6 @@
 .navbar {
   background-color: #1a1a1a;
   padding: 0 20px;
-  position: sticky;
-  top: 0;
-  z-index: 1000;
   border-bottom: 2px solid #D4AF37;
 }
 
