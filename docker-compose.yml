@@ -22,6 +22,8 @@ services:
       Jwt__Key: ${JWT_SECRET}
       Jwt__Issuer: ${JWT_ISSUER}
       Jwt__Audience: ${JWT_AUDIENCE}
+      Jwt__ExpiryMinutes: 60
+      Jwt__RefreshTokenExpiryDays: "7"
       Cors__AllowedOrigins: ${FRONTEND_ORIGIN}
       SpringBootApi__BaseUrl: "http://business-api:8080/api"
       ASPNETCORE_ENVIRONMENT: Production
