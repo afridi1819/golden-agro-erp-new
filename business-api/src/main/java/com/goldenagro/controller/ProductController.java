@@ -1,22 +1,34 @@
 package com.goldenagro.controller;
 
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.goldenagro.dto.ApiResponse;
 import com.goldenagro.dto.ProductDto;
 import com.goldenagro.model.Product;
+import com.goldenagro.service.ActivityLogService;
 import com.goldenagro.service.ProductService;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/products")
 @RequiredArgsConstructor
 public class ProductController {
+
     private final ProductService productService;
+    private final ActivityLogService activityLogService;
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<Product>>> getAllProducts() {
@@ -57,20 +69,71 @@ public class ProductController {
     @PostMapping
     public ResponseEntity<ApiResponse<Product>> createProduct(@Valid @RequestBody ProductDto dto) {
         try {
-            return ResponseEntity.ok(ApiResponse.success("Product created", productService.createProduct(dto)));
+
+            Product product = productService.createProduct(dto);
+
+            activityLogService.log(
+                    0,
+                    "System",
+                    "Admin",
+                    "PRODUCT",
+                    "CREATE",
+                    product.getProductId().toString(),
+                    "Created product: " + product.getProductName(),
+                    null,
+                    product.toString()
+            );
+
+            return ResponseEntity.ok(ApiResponse.success("Product created", product));
+
         } catch (Exception e) {
             return ResponseEntity.ok(ApiResponse.error("Error creating product: " + e.getMessage()));
         }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Product>> updateProduct(@PathVariable Integer id, @Valid @RequestBody ProductDto dto) {
-        return ResponseEntity.ok(ApiResponse.success("Product updated", productService.updateProduct(id, dto)));
+    public ResponseEntity<ApiResponse<Product>> updateProduct(
+            @PathVariable Integer id,
+            @Valid @RequestBody ProductDto dto) {
+
+        Product oldProduct = productService.getProductById(id);
+
+        Product updatedProduct = productService.updateProduct(id, dto);
+
+        activityLogService.log(
+                0,
+                "System",
+                "Admin",
+                "PRODUCT",
+                "UPDATE",
+                id.toString(),
+                "Updated product: " + updatedProduct.getProductName(),
+                oldProduct.toString(),
+                updatedProduct.toString()
+        );
+
+        return ResponseEntity.ok(ApiResponse.success("Product updated", updatedProduct));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteProduct(@PathVariable Integer id) {
+
+        Product oldProduct = productService.getProductById(id);
+
+        activityLogService.log(
+                0,
+                "System",
+                "Admin",
+                "PRODUCT",
+                "DELETE",
+                id.toString(),
+                "Deleted product: " + oldProduct.getProductName(),
+                oldProduct.toString(),
+                null
+        );
+
         productService.deleteProduct(id);
+
         return ResponseEntity.ok(ApiResponse.success("Product deleted", null));
     }
 }
