@@ -86,19 +86,39 @@ const BOM = () => {
   });
 
   const openModal = (bom = null) => {
-    if (bom) {
-      setEditing(bom);
-      setFormData({ 
-        productId: bom.product?.productId || '', 
-        version: bom.version || '1.0',
-        items: bom.items || [{ rawMaterialId: '', quantityRequired: '' }]
-      });
-    } else {
-      setEditing(null);
-      setFormData({ productId: '', version: '1.0', items: [{ rawMaterialId: '', quantityRequired: '' }] });
-    }
-    setModalOpen(true);
-  };
+  if (bom) {
+    console.log("EDIT BOM DATA:", bom);
+
+    const mappedItems = (bom.items || []).map(item => ({
+      rawMaterialId:
+        item.rawMaterialId ??
+        item.rawMaterial?.rawMaterialId ??
+        '',
+      quantityRequired: item.quantityRequired ?? ''
+    }));
+
+    setEditing(bom);
+
+    setFormData({
+      productId: bom.product?.productId || '',
+      version: bom.version || '1.0',
+      items:
+        mappedItems.length > 0
+          ? mappedItems
+          : [{ rawMaterialId: '', quantityRequired: '' }]
+    });
+  } else {
+    setEditing(null);
+
+    setFormData({
+      productId: '',
+      version: '1.0',
+      items: [{ rawMaterialId: '', quantityRequired: '' }]
+    });
+  }
+
+  setModalOpen(true);
+};
 
   const closeModal = () => { setModalOpen(false); setEditing(null); };
 
