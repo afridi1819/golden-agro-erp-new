@@ -6,7 +6,7 @@ import Table from '../components/common/Table';
 import Modal from '../components/common/Modal';
 import Loading from '../components/common/Loading';
 import toast from 'react-hot-toast';
-import { Plus, Edit, AlertTriangle } from 'lucide-react';
+import { Plus, Edit, Trash2, AlertTriangle } from 'lucide-react';
 
 const RawMaterials = () => {
   const queryClient = useQueryClient();
@@ -47,6 +47,17 @@ const RawMaterials = () => {
     }
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: (id) => rawMaterialApi.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['rawMaterials']);
+      toast.success('Raw material deleted');
+    },
+    onError: () => {
+      toast.error('Failed to delete raw material');
+    }
+  });
+
   const openModal = (material = null) => {
     if (material) {
       setEditing(material);
@@ -74,7 +85,7 @@ const RawMaterials = () => {
       ...formData,
       unit: formData.unitId ? { unitId: parseInt(formData.unitId) } : null
     };
-    
+
     if (editing) {
       updateMutation.mutate({ id: editing.rawMaterialId, data });
     } else {
@@ -86,8 +97,8 @@ const RawMaterials = () => {
     { key: 'rawMaterialId', label: 'ID' },
     { key: 'materialName', label: 'Name' },
     { key: 'unit', label: 'Unit', render: (val) => val?.unitName || '-' },
-    { 
-      key: 'stockQuantity', 
+    {
+      key: 'stockQuantity',
       label: 'Stock',
       render: (val, row) => (
         <span className={val <= row.reorderLevel ? 'text-red-400 font-medium' : 'text-gray-200'}>
@@ -114,10 +125,32 @@ const RawMaterials = () => {
           columns={columns}
           data={materials || []}
           actions={(row) => (
-            <button onClick={() => openModal(row)} className="text-primary-400 hover:text-primary-300">
-              <Edit size={18} />
-            </button>
-          )}
+  <div className="flex gap-2">
+    <button
+      onClick={() => openModal(row)}
+      className="text-primary-400 hover:text-primary-300"
+      title="Edit"
+    >
+      <Edit size={18} />
+    </button>
+
+    <button
+      onClick={() => {
+        if (
+          window.confirm(
+            `Delete raw material "${row.materialName}"?`
+          )
+        ) {
+          deleteMutation.mutate(row.rawMaterialId);
+        }
+      }}
+      className="text-red-400 hover:text-red-300"
+      title="Delete"
+    >
+      <Trash2 size={18} />
+    </button>
+  </div>
+)}
         />
       </div>
 

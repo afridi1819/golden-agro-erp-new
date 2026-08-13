@@ -46,6 +46,7 @@ export const rawMaterialApi = {
   getLowStock: () => BUSINESS_API.get('/raw-materials/low-stock'),
   create: (data) => BUSINESS_API.post('/raw-materials', data),
   update: (id, data) => BUSINESS_API.put(`/raw-materials/${id}`, data),
+  delete: (id) => BUSINESS_API.delete(`/raw-materials/${id}`),
 };
 
 export const purchaseApi = {
