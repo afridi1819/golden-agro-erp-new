@@ -1,13 +1,25 @@
 package com.goldenagro.model;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.*;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import lombok.ToString;
 
 @Entity
 @Table(name = "purchase_items")
@@ -15,6 +27,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PurchaseItem {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer purchaseItemId;
@@ -22,6 +35,7 @@ public class PurchaseItem {
     @ManyToOne
     @JoinColumn(name = "purchase_id", nullable = false)
     @JsonBackReference
+    @ToString.Exclude
     private Purchase purchase;
 
     @ManyToOne
@@ -41,9 +55,16 @@ public class PurchaseItem {
     private LocalDateTime createdAt = LocalDateTime.now();
 
     @PrePersist
-    public void prePersist() {
-        if (totalPrice == null && pricePerUnit != null && quantity != null) {
-            totalPrice = pricePerUnit.multiply(BigDecimal.valueOf(quantity));
+    @PreUpdate
+    public void calculateTotalPrice() {
+
+        if (pricePerUnit != null
+                &&
+                quantity != null) {
+
+            totalPrice = pricePerUnit.multiply(
+                    BigDecimal.valueOf(
+                            quantity));
         }
     }
 }
