@@ -1,26 +1,37 @@
 package com.goldenagro.service;
 
-import com.goldenagro.dto.OrderDto;
-import com.goldenagro.dto.OrderItemDto;
-import com.goldenagro.exception.BadRequestException;
-import com.goldenagro.exception.ResourceNotFoundException;
-import com.goldenagro.model.*;
-import com.goldenagro.repository.*;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.goldenagro.dto.OrderDto;
+import com.goldenagro.dto.OrderItemDto;
+import com.goldenagro.exception.BadRequestException;
+import com.goldenagro.exception.ResourceNotFoundException;
+import com.goldenagro.model.FinishedGoodsStock;
+import com.goldenagro.model.Product;
+import com.goldenagro.model.Retailer;
+import com.goldenagro.model.RetailerOrder;
+import com.goldenagro.model.RetailerOrderItem;
+import com.goldenagro.repository.FinishedGoodsStockRepository;
+import com.goldenagro.repository.ProductRepository;
+import com.goldenagro.repository.RetailerOrderRepository;
+import com.goldenagro.repository.RetailerRepository;
+
+import lombok.RequiredArgsConstructor;
+
 @Service
 @RequiredArgsConstructor
 public class OrderService {
+
     private final RetailerOrderRepository orderRepository;
     private final RetailerRepository retailerRepository;
     private final ProductRepository productRepository;
     private final FinishedGoodsStockRepository fgStockRepository;
+    private final ActivityLogService activityLogService;
 
     public List<RetailerOrder> getAllOrders() {
         return orderRepository.findAll();
@@ -38,12 +49,12 @@ public class OrderService {
     @Transactional
     public RetailerOrder createOrder(OrderDto dto) {
         Retailer retailer = retailerRepository.findById(dto.getRetailerId()).orElse(null);
-        
+
         System.out.println("Looking for retailer with ID: " + dto.getRetailerId());
         if (retailer != null) {
             System.out.println("Found existing retailer: " + retailer.getShopName());
         }
-        
+
         // If retailer doesn't exist, create one automatically for retailer users
         if (retailer == null && dto.getRetailerId() != null && dto.getRetailerId() > 0) {
             System.out.println("Creating new retailer for ID: " + dto.getRetailerId());
@@ -59,7 +70,7 @@ public class OrderService {
             retailer = retailerRepository.save(retailer);
             System.out.println("Created new retailer with ID: " + retailer.getRetailerId());
         }
-        
+
         if (retailer == null) {
             throw new ResourceNotFoundException("Retailer not found with ID: " + dto.getRetailerId());
         }
@@ -86,7 +97,22 @@ public class OrderService {
         }
 
         order.setTotalAmount(total);
-        return orderRepository.save(order);
+
+        RetailerOrder savedOrder = orderRepository.save(order);
+
+        activityLogService.log(
+                0,
+                "System",
+                "Retailer",
+                "ORDER",
+                "CREATE",
+                savedOrder.getRetailerOrderId().toString(),
+                "Created order #" + savedOrder.getRetailerOrderId(),
+                null,
+                "Order Total: " + savedOrder.getTotalAmount()
+        );
+
+        return savedOrder;
     }
 
     @Transactional
@@ -111,12 +137,48 @@ public class OrderService {
         }
 
         order.setStatus("in_progress");
-        return orderRepository.save(order);
+
+        RetailerOrder saved = orderRepository.save(order);
+
+        activityLogService.log(
+                0,
+                "System",
+                "Admin",
+                "ORDER",
+                "CONFIRM",
+                saved.getRetailerOrderId().toString(),
+                "Confirmed order #" + saved.getRetailerOrderId(),
+                "pending",
+                "in_progress"
+        );
+
+        return saved;
     }
 
+    @Transactional
     public RetailerOrder updateOrderStatus(Integer orderId, String status) {
+
         RetailerOrder order = getOrderById(orderId);
+
+        String oldStatus = order.getStatus();
+
         order.setStatus(status);
-        return orderRepository.save(order);
+
+        RetailerOrder saved = orderRepository.save(order);
+
+        activityLogService.log(
+                0,
+                "System",
+                "Admin",
+                "ORDER",
+                "STATUS_CHANGE",
+                saved.getRetailerOrderId().toString(),
+                "Changed order #" + saved.getRetailerOrderId()
+                + " from " + oldStatus + " to " + status,
+                oldStatus,
+                status
+        );
+
+        return saved;
     }
 }

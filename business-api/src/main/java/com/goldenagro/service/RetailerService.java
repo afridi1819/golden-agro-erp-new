@@ -1,19 +1,23 @@
 package com.goldenagro.service;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.goldenagro.dto.RetailerDto;
 import com.goldenagro.exception.ResourceNotFoundException;
 import com.goldenagro.model.Retailer;
 import com.goldenagro.repository.RetailerRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class RetailerService {
+
     private final RetailerRepository retailerRepository;
+    private final ActivityLogService activityLogService;
 
     public List<Retailer> getAllRetailers() {
         return retailerRepository.findAll();
@@ -25,7 +29,8 @@ public class RetailerService {
 
     public Retailer getRetailerById(Integer id) {
         return retailerRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Retailer not found with id: " + id));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Retailer not found with id: " + id));
     }
 
     public Retailer getRetailerByIdOrNull(Integer id) {
@@ -34,11 +39,13 @@ public class RetailerService {
 
     public Retailer getRetailerByAuthUserId(String authUserId) {
         return retailerRepository.findByAuthUserId(authUserId)
-                .orElseThrow(() -> new ResourceNotFoundException("Retailer not found"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Retailer not found"));
     }
 
     @Transactional
     public Retailer createRetailer(RetailerDto dto) {
+
         Retailer retailer = new Retailer();
         retailer.setShopName(dto.getShopName());
         retailer.setOwnerName(dto.getOwnerName());
@@ -49,17 +56,50 @@ public class RetailerService {
         retailer.setAuthUserId(dto.getAuthUserId());
         retailer.setStatus(dto.getStatus() != null ? dto.getStatus() : "active");
 
-        return retailerRepository.save(retailer);
+        Retailer savedRetailer = retailerRepository.save(retailer);
+
+        activityLogService.log(
+                0,
+                "System",
+                "Admin",
+                "RETAILER",
+                "CREATE",
+                savedRetailer.getRetailerId().toString(),
+                "Created retailer: " + savedRetailer.getShopName(),
+                null,
+                savedRetailer.toString()
+        );
+
+        return savedRetailer;
     }
 
     @Transactional
     public Retailer createRetailerFromNet(Retailer retailer) {
-        // For .NET integration - retailer already has retailerId set
-        return retailerRepository.save(retailer);
+
+        Retailer savedRetailer = retailerRepository.save(retailer);
+
+        activityLogService.log(
+                0,
+                "System",
+                "Admin",
+                "RETAILER",
+                "CREATE",
+                savedRetailer.getRetailerId().toString(),
+                "Created retailer from Auth Service: " + savedRetailer.getShopName(),
+                null,
+                savedRetailer.toString()
+        );
+
+        return savedRetailer;
     }
 
+    @Transactional
     public Retailer updateRetailer(Integer id, RetailerDto dto) {
+
         Retailer retailer = getRetailerById(id);
+
+        String oldValues = retailer.toString();
+
         retailer.setShopName(dto.getShopName());
         retailer.setOwnerName(dto.getOwnerName());
         retailer.setPhone(dto.getPhone());
@@ -67,12 +107,45 @@ public class RetailerService {
         retailer.setAddress(dto.getAddress());
         retailer.setGstNumber(dto.getGstNumber());
         retailer.setStatus(dto.getStatus() != null ? dto.getStatus() : "active");
-        return retailerRepository.save(retailer);
+
+        Retailer updatedRetailer = retailerRepository.save(retailer);
+
+        activityLogService.log(
+                0,
+                "System",
+                "Admin",
+                "RETAILER",
+                "UPDATE",
+                updatedRetailer.getRetailerId().toString(),
+                "Updated retailer: " + updatedRetailer.getShopName(),
+                oldValues,
+                updatedRetailer.toString()
+        );
+
+        return updatedRetailer;
     }
 
+    @Transactional
     public void deleteRetailer(Integer id) {
+
         Retailer retailer = getRetailerById(id);
+
+        String oldValues = retailer.toString();
+
         retailer.setStatus("inactive");
-        retailerRepository.save(retailer);
+
+        Retailer savedRetailer = retailerRepository.save(retailer);
+
+        activityLogService.log(
+                0,
+                "System",
+                "Admin",
+                "RETAILER",
+                "DELETE",
+                savedRetailer.getRetailerId().toString(),
+                "Deactivated retailer: " + savedRetailer.getShopName(),
+                oldValues,
+                savedRetailer.toString()
+        );
     }
 }
