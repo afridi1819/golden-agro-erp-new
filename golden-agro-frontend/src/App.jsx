@@ -20,6 +20,7 @@ import Taxes from './pages/Taxes';
 import Orders from './pages/Orders';
 import Retailers from './pages/Retailers';
 import Suppliers from './pages/Suppliers';
+import Customers from './pages/Customers';
 import RawMaterials from './pages/RawMaterials';
 import BOM from './pages/BOM';
 import Purchases from './pages/Purchases';
@@ -31,6 +32,11 @@ import Users from './pages/Users';
 import Manufacturers from './pages/Manufacturers';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
+import ActivityLogs from './pages/ActivityLogs';
+import RasnaEntries from './pages/RasnaEntries';
+import RasnaCustomerSummary from './pages/RasnaCustomerSummary';
+import PioEntries from './pages/PioEntries';
+import PioCustomerSummary from './pages/PioCustomerSummary';
 
 
 // Layout
@@ -90,6 +96,28 @@ function AppRoutes() {
         <Route path="orders" element={<Orders />} />
         <Route path="retailers" element={<ProtectedRoute allowedRoles={['Admin', 'Manufacturer']}><Retailers /></ProtectedRoute>} />
         <Route path="suppliers" element={<ProtectedRoute allowedRoles={['Admin', 'Manufacturer']}><Suppliers /></ProtectedRoute>} />
+        <Route path="customers" element={<ProtectedRoute allowedRoles={['Admin', 'Manufacturer']}><Customers /></ProtectedRoute>} />
+        <Route path="rasna-entries" element={<ProtectedRoute allowedRoles={['Admin', 'Manufacturer']}><RasnaEntries /></ProtectedRoute>} />
+        <Route path="rasna-customer-summary" element={<ProtectedRoute allowedRoles={['Admin', 'Manufacturer']}><RasnaCustomerSummary /></ProtectedRoute>} />
+
+        <Route
+          path="pio-entries"
+          element={
+            <ProtectedRoute allowedRoles={['Admin', 'Manufacturer']}>
+              <PioEntries />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="pio-customer-summary"
+          element={
+            <ProtectedRoute allowedRoles={['Admin', 'Manufacturer']}>
+              <PioCustomerSummary />
+            </ProtectedRoute>
+          }
+        />
+
         <Route path="raw-materials" element={<ProtectedRoute allowedRoles={['Admin', 'Manufacturer']}><RawMaterials /></ProtectedRoute>} />
         <Route path="bom" element={<ProtectedRoute allowedRoles={['Admin', 'Manufacturer']}><BOM /></ProtectedRoute>} />
         <Route path="purchases" element={<ProtectedRoute allowedRoles={['Admin', 'Manufacturer']}><Purchases /></ProtectedRoute>} />
@@ -101,6 +129,7 @@ function AppRoutes() {
         <Route path="settings" element={<Settings />} />
         <Route path="users" element={<ProtectedRoute allowedRoles={['Admin', 'Manufacturer']}><Users /></ProtectedRoute>} />
         <Route path="manufacturers" element={<ProtectedRoute allowedRoles={['Admin']}><Manufacturers /></ProtectedRoute>} />
+        <Route path="activity-logs" element={<ProtectedRoute allowedRoles={['Admin', 'Manufacturer']}><ActivityLogs /></ProtectedRoute>} />
       </Route>
 
       {/* Legacy routes redirect to /app */}
@@ -117,13 +146,13 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <CartProvider>
-        <BrowserRouter>
-          <div className="theme-app min-h-screen">
-            <Navbar />
-            <AppRoutes />
-          </div>
-          <Toaster position="top-right" />
-        </BrowserRouter>
+          <BrowserRouter>
+            <div className="theme-app min-h-screen">
+              <Navbar />
+              <AppRoutes />
+            </div>
+            <Toaster position="top-right" />
+          </BrowserRouter>
         </CartProvider>
       </AuthProvider>
     </QueryClientProvider>
