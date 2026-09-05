@@ -41,6 +41,15 @@ export const supplierApi = {
   delete: (id) => BUSINESS_API.delete(`/suppliers/${id}`),
 };
 
+export const customerApi = {
+  getAll: () => BUSINESS_API.get('/customers'),
+  getActive: () => BUSINESS_API.get('/customers/active'),
+  getById: (id) => BUSINESS_API.get(`/customers/${id}`),
+  create: (data) => BUSINESS_API.post('/customers', data),
+  update: (id, data) => BUSINESS_API.put(`/customers/${id}`, data),
+  delete: (id) => BUSINESS_API.delete(`/customers/${id}`),
+};
+
 export const rawMaterialApi = {
   getAll: () => BUSINESS_API.get('/raw-materials'),
   getLowStock: () => BUSINESS_API.get('/raw-materials/low-stock'),
@@ -54,6 +63,12 @@ export const purchaseApi = {
   getById: (id) => BUSINESS_API.get(`/purchases/${id}`),
   create: (data) => BUSINESS_API.post('/purchases', data),
   complete: (id) => BUSINESS_API.post(`/purchases/${id}/complete`),
+
+  update: (id, data) =>
+    BUSINESS_API.put(`/purchases/${id}`, data),
+
+  cancel: (id) =>
+    BUSINESS_API.post(`/purchases/${id}/cancel`),
 };
 
 export const bomApi = {
@@ -115,4 +130,136 @@ export const expenseApi = {
   create: (data) => BUSINESS_API.post('/expenses', data),
   update: (id, data) => BUSINESS_API.put(`/expenses/${id}`, data),
   delete: (id) => BUSINESS_API.delete(`/expenses/${id}`),
+};
+
+export const activityLogApi = {
+  getAll: (module = '', action = '') => {
+    const params = new URLSearchParams();
+
+    if (module) {
+      params.append('module', module);
+    }
+
+    if (action) {
+      params.append('action', action);
+    }
+
+    const query = params.toString();
+
+    return BUSINESS_API.get(
+      `/activity-logs${query ? `?${query}` : ''}`
+    );
+  },
+
+  getById: (id) => {
+    return BUSINESS_API.get(`/activity-logs/${id}`);
+  }
+};
+
+export const rasnaEntryApi = {
+  getAll: () =>
+    BUSINESS_API.get('/rasna-entries'),
+
+  getById: (id) =>
+    BUSINESS_API.get(`/rasna-entries/${id}`),
+
+  create: (data) =>
+    BUSINESS_API.post('/rasna-entries', data),
+
+  update: (id, data) =>
+    BUSINESS_API.put(`/rasna-entries/${id}`, data),
+
+  delete: (id) =>
+    BUSINESS_API.delete(`/rasna-entries/${id}`),
+
+  getCustomerSummary: (customerId) =>
+    BUSINESS_API.get(`/rasna-entries/customer/${customerId}/summary`),
+};
+
+
+export const pioProductionApi = {
+  getAll: () =>
+    BUSINESS_API.get('/pio-productions'),
+
+  getById: (id) =>
+    BUSINESS_API.get(`/pio-productions/${id}`),
+
+  create: (data) =>
+    BUSINESS_API.post('/pio-productions', data),
+
+  update: (id, data) =>
+    BUSINESS_API.put(`/pio-productions/${id}`, data),
+
+  delete: (id) =>
+    BUSINESS_API.delete(`/pio-productions/${id}`),
+};
+
+
+export const pioSaleApi = {
+  getAll: () =>
+    BUSINESS_API.get('/pio-sales'),
+
+  getById: (id) =>
+    BUSINESS_API.get(`/pio-sales/${id}`),
+
+  create: (data) =>
+    BUSINESS_API.post('/pio-sales', data),
+
+  update: (id, data) =>
+    BUSINESS_API.put(`/pio-sales/${id}`, data),
+
+  delete: (id) =>
+    BUSINESS_API.delete(`/pio-sales/${id}`),
+
+  getStockSummary: () =>
+    BUSINESS_API.get('/pio-sales/stock-summary'),
+
+  getCustomerSummary: (customerId, season) =>
+    BUSINESS_API.get(
+      `/pio-sales/customer/${customerId}/summary${season ? `?season=${season}` : ''
+      }`
+    ),
+};
+
+export const notificationApi = {
+
+  // =========================
+  // PIO INDIVIDUAL SALE
+  // =========================
+
+  sendPioSaleMessage: (saleId) =>
+    BUSINESS_API.post(
+      `/notifications/pio-sale/${saleId}`
+    ),
+
+
+  // =========================
+  // PIO CUSTOMER SEASON SUMMARY
+  // =========================
+
+  sendPioCustomerSummary: (customerId, season) =>
+    BUSINESS_API.post(
+      `/notifications/pio-customer/${customerId}/summary?season=${season}`
+    ),
+
+
+  // =========================
+  // RASNA INDIVIDUAL ENTRY
+  // =========================
+
+  sendRasnaEntry: (entryId) =>
+    BUSINESS_API.post(
+      `/notifications/rasna-entry/${entryId}`
+    ),
+
+
+  // =========================
+  // RASNA CUSTOMER SEASON SUMMARY
+  // =========================
+
+  sendRasnaCustomerSummary: (customerId, season) =>
+    BUSINESS_API.post(
+      `/notifications/rasna-customer/${customerId}/summary?season=${season}`
+    ),
+
 };
