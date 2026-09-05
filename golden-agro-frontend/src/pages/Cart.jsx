@@ -42,9 +42,18 @@ const Cart = () => {
                 >
                   <Minus size={16} />
                 </button>
-                <span className="px-3 py-1 text-gray-200 min-w-[2rem] text-center">
-                  {item.quantity}
-                </span>
+                <input
+                  type="number"
+                  min="1"
+                  value={item.quantity}
+                  onChange={(e) =>
+                    updateQuantity(
+                      item.productId,
+                      Math.max(1, parseInt(e.target.value) || 1)
+                    )
+                  }
+                  className="w-20 bg-transparent text-center text-gray-200 border-0 outline-none"
+                />
                 <button
                   type="button"
                   onClick={() => updateQuantity(item.productId, item.quantity + 1)}
