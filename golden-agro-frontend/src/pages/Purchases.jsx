@@ -6,13 +6,15 @@ import Modal from '../components/common/Modal';
 import Loading from '../components/common/Loading';
 import StatusBadge from '../components/common/StatusBadge';
 import toast from 'react-hot-toast';
-import { Plus, CheckCircle, X, RefreshCw, Eye } from 'lucide-react';
+import { Plus, CheckCircle, X, RefreshCw, Eye, Edit, Ban } from 'lucide-react';
 
 const Purchases = () => {
   const queryClient = useQueryClient();
   const [modalOpen, setModalOpen] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [selectedPurchase, setSelectedPurchase] = useState(null);
+  const [editMode, setEditMode] = useState(false);
+  const [editingPurchaseId, setEditingPurchaseId] = useState(null);
   const [supplierId, setSupplierId] = useState('');
   const [items, setItems] = useState([{ rawMaterialId: '', quantity: 1, price: '' }]);
 
@@ -79,8 +81,76 @@ const Purchases = () => {
       toast.success('Purchase completed - Stock updated');
     }
   });
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, data }) => {
 
-  const resetForm = () => { setSupplierId(''); setItems([{ rawMaterialId: '', quantity: 1, price: '' }]); };
+
+      return purchaseApi.update(id, data);
+    },
+
+    onSuccess: () => {
+
+      queryClient.invalidateQueries({
+        queryKey: ['purchases']
+      });
+
+      toast.success('Purchase updated');
+
+      setModalOpen(false);
+
+      resetForm();
+
+      setEditMode(false);
+
+      setEditingPurchaseId(null);
+    },
+
+    onError: (error) => {
+      toast.error(
+        error?.response?.data?.message ||
+        error?.message ||
+        'Failed to update purchase'
+      );
+    }
+  });
+
+  const cancelMutation = useMutation({
+    mutationFn: (id) => purchaseApi.cancel(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['purchases']);
+      toast.success('Purchase cancelled');
+    }
+  });
+
+  const handleEdit = (purchase) => {
+    setEditMode(true);
+    setEditingPurchaseId(purchase.purchaseId);
+
+    setSupplierId(
+      purchase.supplier?.supplierId?.toString() || ''
+    );
+
+
+
+    setItems(
+      purchase.items.map(item => ({
+        rawMaterialId:
+          item.rawMaterial?.rawMaterialId?.toString(),
+        quantity: item.quantity,
+        price: item.pricePerUnit
+      }))
+    );
+
+    setModalOpen(true);
+  };
+
+  const resetForm = () => {
+    setSupplierId('');
+    setItems([{ rawMaterialId: '', quantity: 1, price: '' }]);
+
+    setEditMode(false);
+    setEditingPurchaseId(null);
+  };
 
   const addItem = () => setItems([...items, { rawMaterialId: '', quantity: 1, price: '' }]);
   const removeItem = (i) => setItems(items.filter((_, idx) => idx !== i));
@@ -92,14 +162,24 @@ const Purchases = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    createMutation.mutate({
+
+    const payload = {
       supplierId: parseInt(supplierId),
       items: items.map(item => ({
         rawMaterialId: parseInt(item.rawMaterialId),
         quantity: parseInt(item.quantity),
         price: parseFloat(item.price)
       }))
-    });
+    };
+
+    if (editMode) {
+      updateMutation.mutate({
+        id: editingPurchaseId,
+        data: payload
+      });
+    } else {
+      createMutation.mutate(payload);
+    }
   };
 
   if (isLoading) return <Loading />;
@@ -134,24 +214,59 @@ const Purchases = () => {
           data={purchases || []}
           actions={(row) => (
             <div className="flex gap-2">
-              <button 
-                onClick={() => { setSelectedPurchase(row); setViewModalOpen(true); }}
-                className="text-primary-400 hover:text-primary-300" 
+
+              {/* View */}
+              <button
+                onClick={() => {
+                  setSelectedPurchase(row);
+                  setViewModalOpen(true);
+                }}
+                className="text-primary-400 hover:text-primary-300"
                 title="View Details"
               >
                 <Eye size={18} />
               </button>
+
+              {/* Edit */}
               {row.status === 'pending' && (
-                <button onClick={() => completeMutation.mutate(row.purchaseId)} className="text-green-400 hover:text-green-300" title="Complete">
+                <button
+                  onClick={() => handleEdit(row)}
+                  className="text-blue-400 hover:text-blue-300"
+                  title="Edit Purchase"
+                >
+                  <Edit size={18} />
+                </button>
+              )}
+
+              {/* Cancel */}
+              {row.status === 'pending' && (
+                <button
+                  onClick={() => cancelMutation.mutate(row.purchaseId)}
+                  className="text-red-400 hover:text-red-300"
+                  title="Cancel Purchase"
+                >
+                  <Ban size={18} />
+                </button>
+              )}
+
+              {/* Complete */}
+              {row.status === 'pending' && (
+                <button
+                  onClick={() => completeMutation.mutate(row.purchaseId)}
+                  className="text-green-400 hover:text-green-300"
+                  title="Complete Purchase"
+                >
                   <CheckCircle size={18} />
                 </button>
               )}
+
             </div>
           )}
         />
       </div>
 
-      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title="New Purchase" size="lg">
+      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editMode ? "Edit Purchase" : "New Purchase"} size="lg"
+      >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-primary-400/90 mb-1">Supplier</label>
@@ -177,7 +292,7 @@ const Purchases = () => {
           </div>
           <div className="flex justify-end gap-2 pt-4">
             <button type="button" onClick={() => setModalOpen(false)} className="btn-secondary">Cancel</button>
-            <button type="submit" className="btn-primary">Create</button>
+            <button type="submit" className="btn-primary">{editMode ? "Update" : "Create"}</button>
           </div>
         </form>
       </Modal>

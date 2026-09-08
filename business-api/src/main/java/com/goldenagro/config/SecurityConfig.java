@@ -19,36 +19,48 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtAuthFilter jwtAuthFilter;
+        private final JwtAuthFilter jwtAuthFilter;
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf(csrf -> csrf.disable())
-            .cors(Customizer.withDefaults()) 
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                // Public endpoints
-                .requestMatchers("/api/public/**").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/retailers").permitAll() // For auth service
-                
-                // Admin only
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                .requestMatchers("/api/activity-logs/**").hasRole("ADMIN")
-                
-                // Manufacturer only
-                .requestMatchers("/api/production/**").hasAnyRole("ADMIN", "MANUFACTURER")
-                .requestMatchers("/api/raw-materials/**").hasAnyRole("ADMIN", "MANUFACTURER")
-                .requestMatchers("/api/bom/**").hasAnyRole("ADMIN", "MANUFACTURER")
-                .requestMatchers("/api/suppliers/**").hasAnyRole("ADMIN", "MANUFACTURER")
-                .requestMatchers("/api/purchases/**").hasAnyRole("ADMIN", "MANUFACTURER")
-                
-                // All authenticated users
-                .anyRequest().authenticated()
-            )
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+        @Bean
+        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+                http
+                                .csrf(csrf -> csrf.disable())
+                                .cors(Customizer.withDefaults())
+                                .sessionManagement(session -> session
+                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                .authorizeHttpRequests(auth -> auth
 
-        return http.build();
-    }
+                                                // Public endpoints
+                                                .requestMatchers("/api/public/**").permitAll()
+                                                .requestMatchers(HttpMethod.POST, "/api/retailers").permitAll()
+                                                .requestMatchers("/api/activity-logs/**")
+                                                .hasAnyRole("ADMIN", "MANUFACTURER")
+
+                                                // Admin only
+                                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
+                                                // Admin and Manufacturer
+                                                .requestMatchers("/api/production/**")
+                                                .hasAnyRole("ADMIN", "MANUFACTURER")
+                                                .requestMatchers("/api/raw-materials/**")
+                                                .hasAnyRole("ADMIN", "MANUFACTURER")
+                                                .requestMatchers("/api/bom/**").hasAnyRole("ADMIN", "MANUFACTURER")
+                                                .requestMatchers("/api/suppliers/**")
+                                                .hasAnyRole("ADMIN", "MANUFACTURER")
+                                                .requestMatchers("/api/customers/**")
+                                                .hasAnyRole("ADMIN", "MANUFACTURER")
+
+                                                // Other existing endpoints
+                                                .requestMatchers("/api/purchases/**")
+                                                .hasAnyRole("ADMIN", "MANUFACTURER")
+
+                                                // All other authenticated users
+                                                .anyRequest().authenticated())
+
+                                .addFilterBefore(
+                                                jwtAuthFilter,
+                                                UsernamePasswordAuthenticationFilter.class);
+
+                return http.build();
+        }
 }

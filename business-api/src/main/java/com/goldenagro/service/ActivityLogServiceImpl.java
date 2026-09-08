@@ -9,49 +9,66 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class ActivityLogServiceImpl implements ActivityLogService {
+public class ActivityLogServiceImpl
+                implements ActivityLogService {
 
-    private final ActivityLogRepository activityLogRepository;
+        private final ActivityLogRepository activityLogRepository;
 
-    @Override
-    public void log(
-            Integer userId,
-            String userName,
-            String userRole,
-            String moduleName,
-            String actionType,
-            String entityId,
-            String description,
-            String oldValues,
-            String newValues
-    ) {
+        @Override
+        public void log(
+                        Integer userId,
+                        String userName,
+                        String userRole,
+                        String moduleName,
+                        String actionType,
+                        String entityId,
+                        String description,
+                        String oldValues,
+                        String newValues) {
 
-        try {
+                try {
 
-            ActivityLog log = new ActivityLog();
+                        ActivityLog activityLog = new ActivityLog();
 
-            log.setUserId(userId);
-            log.setUserName(userName);
-            log.setUserRole(userRole);
+                        activityLog.setUserId(userId);
 
-            log.setModuleName(moduleName);
-            log.setActionType(actionType);
+                        activityLog.setUserName(userName);
 
-            log.setEntityId(entityId);
+                        activityLog.setUserRole(userRole);
 
-            log.setDescription(description);
+                        activityLog.setModuleName(moduleName);
 
-            log.setOldValues(oldValues);
-            log.setNewValues(newValues);
+                        activityLog.setActionType(actionType);
 
-            activityLogRepository.save(log);
+                        activityLog.setEntityId(entityId);
 
-        } catch (Exception ex) {
+                        activityLog.setDescription(description);
 
-            System.err.println(
-                    "Activity Log Error: " + ex.getMessage()
-            );
+                        activityLog.setOldValues(oldValues);
 
+                        activityLog.setNewValues(newValues);
+
+                        activityLogRepository.save(
+                                        activityLog);
+
+                        System.out.println(
+                                        "Activity log created successfully: "
+                                                        + moduleName
+                                                        + " - "
+                                                        + actionType);
+
+                } catch (Exception ex) {
+
+                        System.err.println(
+                                        "========================================");
+
+                        System.err.println(
+                                        "ACTIVITY LOG ERROR");
+
+                        ex.printStackTrace();
+
+                        System.err.println(
+                                        "========================================");
+                }
         }
-    }
 }
